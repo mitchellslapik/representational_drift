@@ -155,7 +155,7 @@ goodmatrix = zeros(1, numberofdays);
 
 goodneurons = [];
 
-%look through each neuron,
+%look through each neuron
 
 %find subset of days where all pairs are correlated
 %with each other greater than the threshold you set
@@ -187,11 +187,13 @@ for neuron = 1:size(uniquecutnames, 2)
 
     while daycombosize > 1
 
-        flag = 0; 
+        foundit = 0; 
         
         neuronsignalindexes = {};
         
-        %find the signal indexes of the neuron for each day
+        %find the signal indexes of that neuron for each day
+        %this is important because a certain signal can have
+        %a different index on a different day
         
         for day = 1:numberofdays
 
@@ -212,6 +214,8 @@ for neuron = 1:size(uniquecutnames, 2)
             daycombo = daycombos(daycomboidx, :);
             
             %get list of the signal indexes for each of those days
+            %this is essentially the same as the neuron signal indexes
+            %but only for the subset of days we want to look at
             
             daycombosignalindexes = {};
             
@@ -222,6 +226,9 @@ for neuron = 1:size(uniquecutnames, 2)
             end
             
             %make list of all the combos of signals (signal a b c etc.) 
+            %this is important because on any given day the signal letter
+            %attached to a waveform is arbitrary. Therefore signal a on one
+            %day could be signal b on another day.
 
             signalcombos = cell(1, numel(daycombosignalindexes)); 
             [signalcombos{:}] = ndgrid(daycombosignalindexes{:});
@@ -300,16 +307,19 @@ for neuron = 1:size(uniquecutnames, 2)
 
                     end
                     
+                    %set new combo size to the number of remaining
+                    %days for that neuron
                     gooddays = find(dataperday);
                     daycombosize = size(gooddays, 2);
+                   
 
-                    flag = 1;
+                    foundit = 1;
 
                     break
 
                 end
 
-               if flag == 1
+               if foundit == 1
 
                    break
 
@@ -317,7 +327,7 @@ for neuron = 1:size(uniquecutnames, 2)
 
             end
 
-            if flag == 1
+            if foundit == 1
 
                break
 
@@ -325,7 +335,7 @@ for neuron = 1:size(uniquecutnames, 2)
 
         end
 
-        if flag == 0
+        if foundit == 0
             
             %if you went through all the combos and found nothing, then
             %look for slightly smaller combos and repeat the process
@@ -342,6 +352,8 @@ goodmatrix = goodmatrix(2:end, :);
 
 figure
 
+%display consistent neurons across days
+
 set(gcf,'color','w');
 h = heatmap(goodmatrix, 'Colormap', flipud(gray), 'CellLabelColor','none', 'ColorLimits',[0 1]);
 colorbar off
@@ -353,6 +365,8 @@ ax.XDisplayLabels = calendar;
 ax.title(["neurons that pass " + string(thresholdpercentile) + "% threshold"]);
 xlabel('day');
 ylabel('neuron');
+
+%save variables
 
 save('goodneurons');
 save('goodmatrix');
