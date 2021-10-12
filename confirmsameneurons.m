@@ -88,7 +88,7 @@ for day = 1:numberofdays
     
 end
 
-%make list of the channel names, with no signal at the end
+%make list of the channel names, with no signal letter at the end
 
 cutnames = {};
 
@@ -104,8 +104,8 @@ uniquecutnames = unique(cutnames);
 
 correlations = [];
 
-%basically find correlation between all the waveforms, making sure they are
-%not on the same channel. This igives you the distribution you'd expect for
+%find correlation between all the waveforms, making sure they are
+%not on the same channel. This gives you the distribution you'd expect for
 %waveforms from different neurons
 
 disp('find threshold')
@@ -123,6 +123,7 @@ for day1 = 1:numberofdays
                 
                 if size(wavesdata(day1).day(neuron1).wave, 1) > 0 & size(wavesdata(day2).day(neuron2).wave, 1) > 0 
                 
+                    %confirm not the same neuron
                     if not(strcmp(neuronname1, neuronname2))
 
                         wave1 = wavesdata(day1).day(neuron1).wave;
@@ -154,7 +155,7 @@ goodmatrix = zeros(1, numberofdays);
 
 goodneurons = [];
 
-%look through neurons, finding groups that are correlated with each other
+%look through all neurons, finding a group that are correlated with each other
 %greater than the threshold you set
    
 for neuron = 1:size(uniquecutnames, 2)
@@ -326,6 +327,7 @@ for neuron = 1:size(uniquecutnames, 2)
             
             %if you went through all the combos and found nothing, then
             %look for slightly smaller combos and repeat the process
+            
             daycombosize = daycombosize - 1;
             
         end
