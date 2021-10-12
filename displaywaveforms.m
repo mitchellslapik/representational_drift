@@ -23,7 +23,7 @@ end
 
 disp('load waves')
 
-%get wave data
+%load waveform data
 
 wavesdata = struct();
 
@@ -79,7 +79,10 @@ for neuron = 1:size(goodneurons, 2)
 
         signalindex = neuroncalendar(dayidx);
         
-        %this is important, you have to figure out the index of the correct signal on that particular day, so get the list of neurons for that day
+        %this is important: the signal will probably have an different index on each day
+        %so you have to find the index of that signal on that particular day
+        
+        %start by getting the list of neurons for that day
 
         dayneurons = {wavesdata(day).day(:).name};
 
