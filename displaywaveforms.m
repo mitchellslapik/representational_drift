@@ -1,6 +1,6 @@
-%this script displays the waveforms of consistent neurons determined by the confrim neurons script
+%this script displays the consistent waveforms determined by the confrim neurons script
 
-%the purpose of this script is to demonstrate how to use the goodmatrix and goodneurons variables
+%the purpose of this script is to demonstrate how to iuse the goodmatrix and goodneurons variables
 
 disp('load spikes')
 load('goodmatrix')
