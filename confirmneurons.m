@@ -104,7 +104,8 @@ uniquecutnames = unique(cutnames);
 
 correlations = [];
 
-%find correlation between all the waveforms, making sure they are not on the same channel. This gives you the distribution you'd expect for waveforms from different neurons
+%find correlation between all the waveforms, making sure they are not on the same channel. 
+%This gives you the distribution you'd expect for waveforms from different neurons
 
 disp('find threshold')
 
@@ -187,7 +188,8 @@ for neuron = 1:size(uniquecutnames, 2)
         
         neuronsignalindexes = {};
         
-        %find the signal indexes of that neuron for each day this is important because a certain signal can have a different index on a different day
+        %find the signal indexes of that neuron for each day this is important because a certain 
+        %signal can have a different index on a different day
         
         for day = 1:numberofdays
 
@@ -207,7 +209,8 @@ for neuron = 1:size(uniquecutnames, 2)
 
             daycombo = daycombos(daycomboidx, :);
             
-            %get list of the signal indexes for each of those days. this is essentially the same as the neuron signal indexes but only for the subset of days we want to look at
+            %get list of the signal indexes for each of those days. this is essentially the same as the 
+            %neuron signal indexes but only for the subset of days we want to look at
             
             daycombosignalindexes = {};
             
@@ -219,7 +222,8 @@ for neuron = 1:size(uniquecutnames, 2)
             
             %make list of all the combos of signals (signal a b c etc.) 
             
-            %this is important because on any given day the signal letter attached to a waveform is arbitrary. Therefore signal a on one day could be signal b on another day.
+            %this is important because on any given day the signal letter attached to a waveform is arbitrary. 
+            %Therefore signal a on one day could be signal b on another day.
 
             signalcombos = cell(1, numel(daycombosignalindexes)); 
             [signalcombos{:}] = ndgrid(daycombosignalindexes{:});
@@ -262,7 +266,9 @@ for neuron = 1:size(uniquecutnames, 2)
 
                 meetthreshold = correlations > threshold;
                 
-                %if all the pairs meet the threshold, then add this group to the good matrix and good neuron list, take them out of the neuron calendar, and repeat the process for the remaining signals in the neuron calendar
+                %if all the pairs meet the threshold, then add this group to the good matrix 
+                %and good neuron list, take them out of the neuron calendar, and repeat the process 
+                %for the remaining signals in the neuron calendar
     
                 if mean(meetthreshold) == 1
                     
@@ -324,7 +330,8 @@ for neuron = 1:size(uniquecutnames, 2)
 
         if foundit == 0
             
-            %if you went through all the combos and found nothing, then look for slightly smaller combos and repeat the process
+            %if you went through all the combos and found nothing, then look for 
+            %slightly smaller combos and repeat the process
             
             daycombosize = daycombosize - 1;
             
