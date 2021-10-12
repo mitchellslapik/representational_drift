@@ -69,7 +69,7 @@ ylabel('neuron');
 
 disp('load waves')
 
-%get wave data
+%get waveform data
 
 wavesdata = struct();
 
@@ -104,9 +104,7 @@ uniquecutnames = unique(cutnames);
 
 correlations = [];
 
-%find correlation between all the waveforms, making sure they are
-%not on the same channel. This gives you the distribution you'd expect for
-%waveforms from different neurons
+%find correlation between all the waveforms, making sure they are not on the same channel. This gives you the distribution you'd expect for waveforms from different neurons
 
 disp('find threshold')
 
@@ -124,6 +122,7 @@ for day1 = 1:numberofdays
                 if size(wavesdata(day1).day(neuron1).wave, 1) > 0 & size(wavesdata(day2).day(neuron2).wave, 1) > 0 
                 
                     %confirm not the same neuron
+                    
                     if not(strcmp(neuronname1, neuronname2))
 
                         wave1 = wavesdata(day1).day(neuron1).wave;
@@ -144,8 +143,7 @@ for day1 = 1:numberofdays
     
 end
 
-%set threshold for correlations: for example the 99th percentile of the
-%distribution
+%set threshold for correlations: for example the 99th percentile of the distribution
 
 threshold = prctile(correlations, thresholdpercentile);
 
@@ -157,8 +155,7 @@ goodneurons = [];
 
 %look through each neuron
 
-%find subset of days where all pairs are correlated
-%with each other greater than the threshold you set
+%find subset of days where all pairs are correlated with each other greater than the threshold you set
    
 for neuron = 1:size(uniquecutnames, 2)
     
@@ -180,8 +177,7 @@ for neuron = 1:size(uniquecutnames, 2)
 
     gooddays = find(dataperday);
 
-    % start with a combo size which is the total number of days 
-    %that neuron shows up
+    % start with a combo size which is the total number of days that neuron shows up
     
     daycombosize = size(gooddays, 2);
 
@@ -191,9 +187,7 @@ for neuron = 1:size(uniquecutnames, 2)
         
         neuronsignalindexes = {};
         
-        %find the signal indexes of that neuron for each day
-        %this is important because a certain signal can have
-        %a different index on a different day
+        %find the signal indexes of that neuron for each day this is important because a certain signal can have a different index on a different day
         
         for day = 1:numberofdays
 
@@ -213,9 +207,7 @@ for neuron = 1:size(uniquecutnames, 2)
 
             daycombo = daycombos(daycomboidx, :);
             
-            %get list of the signal indexes for each of those days
-            %this is essentially the same as the neuron signal indexes
-            %but only for the subset of days we want to look at
+            %get list of the signal indexes for each of those days. this is essentially the same as the neuron signal indexes but only for the subset of days we want to look at
             
             daycombosignalindexes = {};
             
@@ -226,9 +218,8 @@ for neuron = 1:size(uniquecutnames, 2)
             end
             
             %make list of all the combos of signals (signal a b c etc.) 
-            %this is important because on any given day the signal letter
-            %attached to a waveform is arbitrary. Therefore signal a on one
-            %day could be signal b on another day.
+            
+            %this is important because on any given day the signal letter attached to a waveform is arbitrary. Therefore signal a on one day could be signal b on another day.
 
             signalcombos = cell(1, numel(daycombosignalindexes)); 
             [signalcombos{:}] = ndgrid(daycombosignalindexes{:});
@@ -245,8 +236,7 @@ for neuron = 1:size(uniquecutnames, 2)
                 
                 daypairs = nchoosek(daycombo, 2);
                 
-                %look at every pair of days for this day combo and signal
-                %combo. Make sure every pair meets the threshold you set
+                %look at every pair of days for this day combo and signal combo. Make sure every pair meets the threshold you set
 
                 for pairidx = 1:size(daypairs, 1)
 
@@ -272,10 +262,7 @@ for neuron = 1:size(uniquecutnames, 2)
 
                 meetthreshold = correlations > threshold;
                 
-                %if all the pairs meet the threshold, then add this group
-                %to the good matrix and good neuron list, take them out of
-                %the neuron calendar, and repeat the process for the
-                %remaining signals in the neuron calendar
+                %if all the pairs meet the threshold, then add this group to the good matrix and good neuron list, take them out of the neuron calendar, and repeat the process for the remaining signals in the neuron calendar
     
                 if mean(meetthreshold) == 1
                     
@@ -307,8 +294,8 @@ for neuron = 1:size(uniquecutnames, 2)
 
                     end
                     
-                    %set new combo size to the number of remaining
-                    %days for that neuron
+                    %set new combo size to the number of remaining days for that neuron
+                    
                     gooddays = find(dataperday);
                     daycombosize = size(gooddays, 2);
                    
@@ -337,10 +324,11 @@ for neuron = 1:size(uniquecutnames, 2)
 
         if foundit == 0
             
-            %if you went through all the combos and found nothing, then
-            %look for slightly smaller combos and repeat the process
+            %if you went through all the combos and found nothing, then look for slightly smaller combos and repeat the process
             
             daycombosize = daycombosize - 1;
+            
+            %the while loop means that this process will continue until the daycobosize reaches 1
             
         end
 
