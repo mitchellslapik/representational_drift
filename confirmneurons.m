@@ -155,8 +155,10 @@ goodmatrix = zeros(1, numberofdays);
 
 goodneurons = [];
 
-%look through all neurons, finding a group that are correlated with each other
-%greater than the threshold you set
+%look through each neuron,
+
+%find subset of days where all pairs are correlated
+%with each other greater than the threshold you set
    
 for neuron = 1:size(uniquecutnames, 2)
     
@@ -178,8 +180,8 @@ for neuron = 1:size(uniquecutnames, 2)
 
     gooddays = find(dataperday);
 
-    % start with the combo size the total number of days the neuron shows
-    % up
+    % start with a combo size which is the total number of days 
+    %that neuron shows up
     
     daycombosize = size(gooddays, 2);
 
