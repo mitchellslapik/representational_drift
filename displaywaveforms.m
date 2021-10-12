@@ -1,3 +1,7 @@
+%this script displays the waveforms of consistent neurons determined by the confrim neurons script
+
+%the purpose of this script is to demonstrate how to use the goodmatrix and goodneurons variables
+
 disp('load spikes')
 load('goodmatrix')
 load('goodneurons')
@@ -75,9 +79,7 @@ for neuron = 1:size(goodneurons, 2)
 
         signalindex = neuroncalendar(dayidx);
         
-        %this is important, you have to figure out the index of the correct
-        %signal on that particular day, so get the list of neurons for that
-        %day
+        %this is important, you have to figure out the index of the correct signal on that particular day, so get the list of neurons for that day
 
         dayneurons = {wavesdata(day).day(:).name};
 
