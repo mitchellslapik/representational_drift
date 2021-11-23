@@ -76,7 +76,6 @@ for day = 1:numberofdays
             
         end
             
-
         colorpreferences(day).day(neuron).means = colormeans;
         colorpreferences(day).day(neuron).error = colorsems;
         colorpreferences(day).day(neuron).name = neuronname(1:end - 1);
