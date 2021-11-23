@@ -1,32 +1,37 @@
-disp('load spikes')
+disp('load data');
 
-calendar = [1 2];
-thresholdpercentile = 99;
+calendar = [1, 6, 36, 37, 41, 43, 50, 57, 62];
+thresholdpercentile = 95;
+numberofdays = size(calendar, 2);
 
 spikes = struct();
 
-%load data into spikes struct
+for day = 1:numberofdays
+    
+    filename = append('spikes/spikes', string(day), '.mat');
+    temp = load(filename);
+    spikes(day).day = temp.Trial_cut_tasks{1, 1};
+    
+end
 
-numberofdays = size(calendar, 2);
+wavedata = struct();
 
 for day = 1:numberofdays
     
-    filename = append('data', string(day), '.mat');
-    spikes(day).day = load(filename);
+    filename = append('waves/waves', string(day), '.mat');
+    temp = load(filename);
+    wavedata(day).day = temp.waveform;
     
 end
 
 names = {};
 
-%get list of all the channels across all days
-
 for day = 1:numberofdays
     
-    for neuron = 1:size(spikes(day).day.unitNames, 1)
-    
-        names{end + 1} = spikes(day).day.unitNames(neuron, :);
+    daynames = spikes(day).day.Unit_IDs;
         
-    end
+    names = [names, daynames];
+    
 end
 
 %find the unique channel names 
@@ -37,23 +42,36 @@ neuronmatrix = zeros(size(uniquenames, 2), numberofdays);
 
 %make matrix of all neurons
 
-disp('make matrix')
+disp('make calendar');
+
+waves = struct();
+
+neuronmatrix = zeros(size(uniquenames, 2), numberofdays);
 
 for day = 1:numberofdays
     
-      for neuron = 1:size(spikes(day).day.chan, 2)
-          
-        index = find(strcmp(uniquenames, spikes(day).day.unitNames(neuron, :)));
+    for neuron = 1:size(spikes(day).day.Unit_IDs, 2)
         
-        neuronmatrix(index, day) = 1;
+        dayname = spikes(day).day.Unit_IDs{1, neuron};
+          
+        index = find(strcmp(uniquenames, dayname));
+        
+        if spikes(day).day.Qual(neuron) > 2
+        
+            neuronmatrix(index, day) = 1;
+            
+        end
+        
+        waves(day).day(index).wave = wavedata(day).day(neuron, :);
+        waves(day).day(index).name = dayname;
         
       end
       
 end
 
-%display all neurons
+disp('display all neurons');
 
-figure;
+figure('visible', 'on');
 
 set(gcf,'color','w');
 h = heatmap(neuronmatrix, 'Colormap', flipud(gray), 'CellLabelColor','none');
@@ -61,34 +79,15 @@ colorbar off
 ax = gca;
 grid off
 set(gcf, 'Position',  [150, 150, 300, 1000]);
-ax.YData = uniquenames;
+ax.YDisplayLabels = nan(size(ax.YDisplayData));
 ax.XData = calendar;
-title('all neurons');
+ax.title('tony v4');
 xlabel('day');
 ylabel('neuron');
 
-disp('load waves')
+saveas(gcf,'allneurons.jpg');
 
-%get waveform data
-
-wavesdata = struct();
-
-for day = 1:numberofdays
-    
-    for neuron =  1:size(spikes(day).day.chan, 2)
-        
-        neuronname = spikes(day).day.unitNames(neuron, :);
-        wave = spikes(day).day.waveform(neuron, :);
-        
-        index = find(strcmp(uniquenames, neuronname));
-        
-        wavesdata(day).day(index).wave = wave;
-        
-    end
-    
-end
-
-%make list of the channel names, with no signal letter at the end
+%make list of the channel names, with no signal at the end
 
 cutnames = {};
 
@@ -104,30 +103,31 @@ uniquecutnames = unique(cutnames);
 
 correlations = [];
 
-%find correlation between all the waveforms, making sure they are not on the same channel. 
-%This gives you the distribution you'd expect for waveforms from different neurons
+%basically find correlation between all the waveforms, making sure they are
+%not on the same channel. This igives you the distribution you'd expect for
+%waveforms from different neurons
 
 disp('find threshold')
 
 for day1 = 1:numberofdays
     
+    disp(day1);
+    
     for day2 = day1 + 1:numberofdays
         
-        for neuron1 = 1:size(wavesdata(day1).day, 2)
+        for neuron1 = 1:size(waves(day1).day, 2)
         
-            for neuron2 = neuron1 + 1:size(wavesdata(day2).day, 2)
+            for neuron2 = neuron1 + 1:size(waves(day2).day, 2)
                 
                 neuronname1 = cutnames{neuron1};
                 neuronname2 = cutnames{neuron2};
                 
-                if size(wavesdata(day1).day(neuron1).wave, 1) > 0 & size(wavesdata(day2).day(neuron2).wave, 1) > 0 
+                if size(waves(day1).day(neuron1).wave, 1) > 0 & size(waves(day2).day(neuron2).wave, 1) > 0 
                 
-                    %confirm not the same neuron
-                    
                     if not(strcmp(neuronname1, neuronname2))
 
-                        wave1 = wavesdata(day1).day(neuron1).wave;
-                        wave2 = wavesdata(day2).day(neuron2).wave;
+                        wave1 = waves(day1).day(neuron1).wave;
+                        wave2 = waves(day2).day(neuron2).wave;
                         
                         r = corrcoef(wave1, wave2);
                         correlations = [correlations, r(1, 2)];
@@ -144,21 +144,23 @@ for day1 = 1:numberofdays
     
 end
 
-%set threshold for correlations: for example the 99th percentile of the distribution
+%set threshold for correlations: for example the 99th percentile of the
+%distribution
 
 threshold = prctile(correlations, thresholdpercentile);
 
-disp('find good neurons')
+disp('find consistent neurons');
 
-goodmatrix = zeros(1, numberofdays);
+confirmedcalendar = zeros(1, numberofdays);
 
-goodneurons = [];
+confirmedneurons = [];
 
-%look through each neuron
-
-%find subset of days where all pairs are correlated with each other greater than the threshold you set
+%look through neurons, finding groups that are correlated with each other
+%greater than the threshold you set
    
 for neuron = 1:size(uniquecutnames, 2)
+    
+    disp(neuron);
     
     neuronname = uniquecutnames{neuron};
     
@@ -178,18 +180,18 @@ for neuron = 1:size(uniquecutnames, 2)
 
     gooddays = find(dataperday);
 
-    % start with a combo size which is the total number of days that neuron shows up
+    % start with the combo size the total number of days the neuron shows
+    % up
     
     daycombosize = size(gooddays, 2);
 
     while daycombosize > 1
 
-        foundit = 0; 
+        flag = 0; 
         
         neuronsignalindexes = {};
         
-        %find the signal indexes of that neuron for each day this is important because a certain 
-        %signal can have a different index on a different day
+        %find the signal indexes of the neuron for each day
         
         for day = 1:numberofdays
 
@@ -209,8 +211,7 @@ for neuron = 1:size(uniquecutnames, 2)
 
             daycombo = daycombos(daycomboidx, :);
             
-            %get list of the signal indexes for each of those days. this is essentially the same as the 
-            %neuron signal indexes but only for the subset of days we want to look at
+            %get list of the signal indexes for each of those days
             
             daycombosignalindexes = {};
             
@@ -221,9 +222,6 @@ for neuron = 1:size(uniquecutnames, 2)
             end
             
             %make list of all the combos of signals (signal a b c etc.) 
-            
-            %this is important because on any given day the signal letter attached to a waveform is arbitrary. 
-            %Therefore signal a on one day could be signal b on another day.
 
             signalcombos = cell(1, numel(daycombosignalindexes)); 
             [signalcombos{:}] = ndgrid(daycombosignalindexes{:});
@@ -240,7 +238,8 @@ for neuron = 1:size(uniquecutnames, 2)
                 
                 daypairs = nchoosek(daycombo, 2);
                 
-                %look at every pair of days for this day combo and signal combo. Make sure every pair meets the threshold you set
+                %look at every pair of days for this day combo and signal
+                %combo. Make sure every pair meets the threshold you set
 
                 for pairidx = 1:size(daypairs, 1)
 
@@ -256,8 +255,8 @@ for neuron = 1:size(uniquecutnames, 2)
                     index1 = neuronindexes(signalindex1);
                     index2 = neuronindexes(signalindex2);
 
-                    wave1 = wavesdata(day1).day(index1).wave;
-                    wave2 = wavesdata(day2).day(index2).wave;
+                    wave1 = waves(day1).day(index1).wave;
+                    wave2 = waves(day2).day(index2).wave;
 
                     r = corrcoef(wave1, wave2);
                     correlations = [correlations, r(1, 2)];
@@ -266,9 +265,10 @@ for neuron = 1:size(uniquecutnames, 2)
 
                 meetthreshold = correlations > threshold;
                 
-                %if all the pairs meet the threshold, then add this group to the good matrix 
-                %and good neuron list, take them out of the neuron calendar, and repeat the process 
-                %for the remaining signals in the neuron calendar
+                %if all the pairs meet the threshold, then add this group
+                %to the good matrix and good neuron list, take them out of
+                %the neuron calendar, and repeat the process for the
+                %remaining signals in the neuron calendar
     
                 if mean(meetthreshold) == 1
                     
@@ -286,9 +286,9 @@ for neuron = 1:size(uniquecutnames, 2)
 
                     end
                     
-                    %add to new goodmatrix and good neuron list
-                    goodmatrix = [goodmatrix; newrow];
-                    goodneurons = [goodneurons, uniquecutnames(neuron)];
+                    %add to new confirmedcalendar and good neuron list
+                    confirmedcalendar = [confirmedcalendar; newrow];
+                    confirmedneurons = [confirmedneurons, uniquecutnames(neuron)];
 
                     if size(neuroncalendar, 1) == 1
 
@@ -300,19 +300,16 @@ for neuron = 1:size(uniquecutnames, 2)
 
                     end
                     
-                    %set new combo size to the number of remaining days for that neuron
-                    
                     gooddays = find(dataperday);
                     daycombosize = size(gooddays, 2);
-                   
 
-                    foundit = 1;
+                    flag = 1;
 
                     break
 
                 end
 
-               if foundit == 1
+               if flag == 1
 
                    break
 
@@ -320,7 +317,7 @@ for neuron = 1:size(uniquecutnames, 2)
 
             end
 
-            if foundit == 1
+            if flag == 1
 
                break
 
@@ -328,14 +325,11 @@ for neuron = 1:size(uniquecutnames, 2)
 
         end
 
-        if foundit == 0
+        if flag == 0
             
-            %if you went through all the combos and found nothing, then look for 
-            %slightly smaller combos and repeat the process
-            
+            %if you went through all the combos and found nothing, then
+            %look for slightly smaller combos and repeat the process
             daycombosize = daycombosize - 1;
-            
-            %the while loop means that this process will continue until the daycobosize reaches 1
             
         end
 
@@ -343,25 +337,25 @@ for neuron = 1:size(uniquecutnames, 2)
 
 end
 
-goodmatrix = goodmatrix(2:end, :);
+confirmedcalendar = confirmedcalendar(2:end, :);
 
-figure
+disp('display consistent neurons');
 
-%display consistent neurons across days
+figure('visible', 'on');
 
 set(gcf,'color','w');
-h = heatmap(goodmatrix, 'Colormap', flipud(gray), 'CellLabelColor','none', 'ColorLimits',[0 1]);
+h = heatmap(confirmedcalendar, 'Colormap', flipud(gray), 'CellLabelColor','none', 'ColorLimits',[0 1]);
 colorbar off
 ax = gca;
 grid off
 set(gcf, 'Position',  [150, 150, 300, 1000]);
-ax.YDisplayLabels = goodneurons;
+ax.YDisplayLabels = nan(size(ax.YDisplayData));
 ax.XDisplayLabels = calendar;
-ax.title(["neurons that pass " + string(thresholdpercentile) + "% threshold"]);
+ax.title('tony v4');
 xlabel('day');
 ylabel('neuron');
 
-%save variables
+saveas(gcf,[num2str(thresholdpercentile) 'percentile-neurons.jpg'])
 
-save('goodneurons');
-save('goodmatrix');
+save('confirmedneurons', 'confirmedneurons');
+save('confirmedcalendar', 'confirmedcalendar');
