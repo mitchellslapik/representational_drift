@@ -103,9 +103,9 @@ uniquecutnames = unique(cutnames);
 
 correlations = [];
 
-%basically find correlation between all the waveforms, making sure they are
-%not on the same channel. This igives you the distribution you'd expect for
-%waveforms from different neurons
+%find correlation between all the waveforms, making sure they are on the 
+%same channel. This gives you the distribution you'd expect for waveforms 
+%from different neurons
 
 disp('find threshold')
 
@@ -279,6 +279,7 @@ for neuron = 1:size(uniquecutnames, 2)
                     end
                     
                     %add to new confirmedcalendar and good neuron list
+                    
                     confirmedcalendar = [confirmedcalendar; newrow];
                     confirmedneurons = [confirmedneurons, uniquecutnames(neuron)];
 
@@ -321,6 +322,7 @@ for neuron = 1:size(uniquecutnames, 2)
             
             %if you went through all the combos and found nothing, then
             %look for slightly smaller combos and repeat the process
+            
             daycombosize = daycombosize - 1;
             
         end
