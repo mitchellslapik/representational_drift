@@ -1,6 +1,6 @@
 # representational drift
 
-Method for confirming consistent neurons across multiple ephys recordings based on paper "Representational Drift in Primary Olfactory Cortex" by Carl Schoonover, available here: https://pubmed.ncbi.nlm.nih.gov/34108681/.
+Method for confirming consistent neurons across multiple ephys recordings based on paper "Representational Drift in Primary Olfactory Cortex" by Carl Schoonover, available here: https://tinyurl.com/yt64khzm.
 
 This method looks at Pearson correlations between waveforms on different channels in order to create a distribution of correlation coefficients that we would expect between different neurons. Then it picks a high percentile in that distribution (in the original paper, 99th percentile) as the threshold for what counts as the same neuron across multiple ephys recordings. 
 
