@@ -167,16 +167,8 @@ for neuron = 1:size(uniquecutnames, 2)
     neuronindexes = find(strcmp(cutnames, neuronname));
     
     neuroncalendar = neuronmatrix(neuronindexes, :);
-    
-    if size(neuroncalendar, 1) == 1
-        
-        dataperday = neuroncalendar;
-        
-    else
-        
-        dataperday = sum(neuroncalendar);
-        
-    end
+
+    dataperday = sum(neuroncalendar, 1);
 
     gooddays = find(dataperday);
 
