@@ -6,6 +6,6 @@ This method looks at Pearson correlations between waveforms on different channel
 
 ![image](https://user-images.githubusercontent.com/92355713/142922922-42c3dddd-43fa-464a-9d86-c90d13fa6723.png)
 
-Citations:
+citations:
 
 Schoonover, Carl E et al. “Representational drift in primary olfactory cortex.” Nature vol. 594,7864 (2021): 541-546. doi:10.1038/s41586-021-03628-7
