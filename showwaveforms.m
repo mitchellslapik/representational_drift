@@ -1,6 +1,5 @@
 %this script displays the consistent waveforms determined by the confirm neurons script
-
-%the purpose of this script is to demonstrate how to use the confirmedcalendar and confirmedneurons variables
+%and demonstrates how to use the 'confirmedcalendar' and 'confirmedneurons' variables
 
 disp('load spikes');
 
